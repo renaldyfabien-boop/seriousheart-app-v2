@@ -1,0 +1,71 @@
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayPal Test</title>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AYzxV1nyy68MkR8dFD_dSwLoc1JJJzLBF5-vyzUMxvltGDFyV1xLBiz2J4Sz0U1IeNlX8XLJZBFOI8SQ&vault=true&intent=subscription"></script>
+  </head>
+
+  <body style="font-family: Arial, sans-serif; padding: 40px;">
+    <h1>PayPal Subscription Test</h1>
+    <p>Testing one PayPal plan only.</p>
+
+    <div id="paypal-button-container"></div>
+
+    <p id="message" style="margin-top: 20px; font-weight: bold;"></p>
+
+    <script>
+      const planId = "P-70D96622V7098884WNHPNKHA";
+
+      paypal
+        .Buttons({
+          style: {
+            layout: "vertical",
+            color: "gold",
+            shape: "rect",
+            label: "subscribe",
+          },
+
+          createSubscription(data, actions) {
+            document.getElementById("message").textContent =
+              "Trying subscription with plan: " + planId;
+
+            return actions.subscription.create({
+              plan_id: planId,
+            });
+          },
+
+          onApprove(data) {
+            console.log("APPROVED:", data);
+
+            document.getElementById("message").textContent =
+              "Subscription successful: " + data.subscriptionID;
+          },
+
+          onCancel(data) {
+            console.log("CANCELLED:", data);
+
+            document.getElementById("message").textContent =
+              "Payment was canceled.";
+          },
+
+          onError(err) {
+            console.error("PAYPAL ERROR:", err);
+
+            const errorMessage =
+              typeof err === "string"
+                ? err
+                : err?.message || JSON.stringify(err);
+
+            document.getElementById("message").textContent =
+              "PayPal error: " + errorMessage;
+
+            alert("PayPal error: " + errorMessage);
+          },
+        })
+        .render("#paypal-button-container");
+    </script>
+  </body>
+</html>
