@@ -1,21 +1,21 @@
- import { useEffect, useState } from "react";
+  import { useEffect, useState } from "react";
+ import Success from "./pages/Success";
 import { supabase } from "./lib/supabase";
 import Test from "./pages/Test";
 import SavedProfiles from "./pages/SavedProfiles";
 import Dashboard from "./pages/Dashboard";
 import EditProfile from "./pages/EditProfile";
 import Checkout from "./pages/Checkout";
-import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
-
 function App() {
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(
+  new URLSearchParams(window.location.search).get("page") || "home"
+);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session ?? null);
@@ -244,15 +244,15 @@ function App() {
   }
 
   if (page === "checkout") {
-    return (
-      <Checkout
-        user={session.user}
-        onBackHome={() => setPage("home")}
-        onStartTest={() => setPage("test")}
-        onViewDashboard={() => setPage("dashboard")}
-      />
-    );
-  }
+  return (
+    <Checkout
+      user={session.user}
+      onBackHome={() => setPage("home")}
+      onStartTest={() => setPage("test")}
+      onViewDashboard={() => setPage("dashboard")}
+    />
+  );
+}
 
   if (page === "success") {
     return (
