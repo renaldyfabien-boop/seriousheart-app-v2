@@ -1,12 +1,13 @@
- import { useEffect, useState } from "react";
+  import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
-import Test from "./pages/Test";
-import SavedProfiles from "./pages/SavedProfiles";
-import Dashboard from "./pages/Dashboard";
-import EditProfile from "./pages/EditProfile";
-import Checkout from "./pages/Checkout";
+
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
+import Checkout from "./pages/Checkout";
+import Dashboard from "./pages/Dashboard";
+import EditProfile from "./pages/EditProfile";
+import SavedProfiles from "./pages/SavedProfiles";
+import Test from "./pages/Test";
 
 function App() {
   const [page, setPage] = useState(
@@ -15,6 +16,7 @@ function App() {
 
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -33,55 +35,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    async function loadProfile() {
-      if (!session?.user) {
-        setProfile(null);
-        return;
-      }
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
-      setProfile(data ?? null);
-    }
-
-    loadProfile();
-  }, [session]);
-
-  async function signUp() {
-    setAuthMessage("");
-    const { error } = await supabase.auth.signUp({
-      email: authEmail,
-      password: authPassword,
-    });
-
-    setAuthMessage(
-      error
-        ? error.message
-        : "Account created. If email confirmation is enabled, confirm your email, then sign in."
-    );
-  }
-
-  async function signIn() {
-    setAuthMessage("");
-    const { error } = await supabase.auth.signInWithPassword({
-      email: authEmail,
-      password: authPassword,
-    });
-
-    setAuthMessage(error ? error.message : "Signed in successfully.");
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
-    setPage("home");
-  }
-
-  // IMPORTANT: These pages must come BEFORE the login check.
+  // 🔥 PRIORITY ROUTES (must come BEFORE login)
   if (page === "success") {
     return (
       <Success
@@ -92,176 +46,64 @@ function App() {
   }
 
   if (page === "cancel") {
-    return (
-      <Cancel
-        onBackHome={() => setPage("home")}
-        onReturnCheckout={() => setPage("checkout")}
-      />
-    );
+    return <Cancel onBackHome={() => setPage("home")} />;
   }
 
+  // 🔐 LOGIN PAGE
   if (!session) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(180deg, #f7f4f8 0%, #f3ecff 45%, #fff8ef 100%)",
-          padding: "60px 20px",
-          fontFamily: "Arial, sans-serif",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "520px",
-            margin: "0 auto",
-            backgroundColor: "white",
-            borderRadius: "20px",
-            padding: "30px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.06)",
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        <h1>Welcome Back</h1>
+
+        <input
+          placeholder="Email"
+          value={authEmail}
+          onChange={(e) => setAuthEmail(e.target.value)}
+        />
+        <br /><br />
+
+        <input
+          placeholder="Password"
+          type="password"
+          value={authPassword}
+          onChange={(e) => setAuthPassword(e.target.value)}
+        />
+        <br /><br />
+
+        <button
+          onClick={async () => {
+            const { error } = await supabase.auth.signInWithPassword({
+              email: authEmail,
+              password: authPassword,
+            });
+
+            if (error) setAuthMessage(error.message);
           }}
         >
-          <div
-            style={{
-              display: "inline-block",
-              padding: "8px 16px",
-              borderRadius: "999px",
-              backgroundColor: "#efe7ff",
-              color: "#6f3cc3",
-              fontWeight: "bold",
-              fontSize: "14px",
-              marginBottom: "18px",
-            }}
-          >
-            SeriousHeart
-          </div>
+          Sign In
+        </button>
 
-          <h1 style={{ fontSize: "42px", marginTop: 0, marginBottom: "12px" }}>
-            Welcome Back
-          </h1>
+        <br /><br />
 
-          <p style={{ color: "#5f5364", lineHeight: "1.7", fontSize: "16px" }}>
-            Sign in or create an account to access member features, saved
-            profiles, and your compatibility experience.
-          </p>
+        <button
+          onClick={async () => {
+            const { error } = await supabase.auth.signUp({
+              email: authEmail,
+              password: authPassword,
+            });
 
-          <div style={{ display: "grid", gap: "12px", marginTop: "24px" }}>
-            <input
-              placeholder="Email"
-              value={authEmail}
-              onChange={(e) => setAuthEmail(e.target.value)}
-              style={{
-                padding: "14px",
-                borderRadius: "12px",
-                border: "1px solid #d6d1db",
-                fontSize: "15px",
-              }}
-            />
+            if (error) setAuthMessage(error.message);
+          }}
+        >
+          Create Account
+        </button>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={authPassword}
-              onChange={(e) => setAuthPassword(e.target.value)}
-              style={{
-                padding: "14px",
-                borderRadius: "12px",
-                border: "1px solid #d6d1db",
-                fontSize: "15px",
-              }}
-            />
-
-            <button
-              onClick={signIn}
-              style={{
-                padding: "14px",
-                borderRadius: "12px",
-                border: "none",
-                backgroundColor: "#6f3cc3",
-                color: "white",
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: "15px",
-              }}
-            >
-              Sign In
-            </button>
-
-            <button
-              onClick={signUp}
-              style={{
-                padding: "14px",
-                borderRadius: "12px",
-                border: "1px solid #ddd",
-                backgroundColor: "white",
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: "15px",
-              }}
-            >
-              Create Account
-            </button>
-          </div>
-
-          {authMessage && (
-            <p
-              style={{
-                marginTop: "16px",
-                fontWeight: "bold",
-                color: "#4b5563",
-              }}
-            >
-              {authMessage}
-            </p>
-          )}
-        </div>
+        <p>{authMessage}</p>
       </div>
     );
   }
 
-  if (page === "test") {
-    return (
-      <Test
-        user={session.user}
-        onBackHome={() => setPage("home")}
-        onViewSavedProfiles={() => setPage("saved")}
-        onViewDashboard={() => setPage("dashboard")}
-      />
-    );
-  }
-
-  if (page === "saved") {
-    return (
-      <SavedProfiles
-        user={session.user}
-        onBackHome={() => setPage("home")}
-        onStartTest={() => setPage("test")}
-      />
-    );
-  }
-
-  if (page === "dashboard") {
-    return (
-      <Dashboard
-        user={session.user}
-        onBackHome={() => setPage("home")}
-        onStartTest={() => setPage("test")}
-        onViewSavedProfiles={() => setPage("saved")}
-        onEditProfile={() => setPage("edit")}
-      />
-    );
-  }
-
-  if (page === "edit") {
-    return (
-      <EditProfile
-        user={session.user}
-        onBackHome={() => setPage("home")}
-        onViewDashboard={() => setPage("dashboard")}
-      />
-    );
-  }
-
+  // 🧭 APP ROUTES
   if (page === "checkout") {
     return (
       <Checkout
@@ -273,77 +115,42 @@ function App() {
     );
   }
 
-  const membershipActive = !!profile?.membership_active;
-  const membershipPlan = profile?.membership_plan;
+  if (page === "dashboard") {
+    return (
+      <Dashboard
+        onBackHome={() => setPage("home")}
+        onEditProfile={() => setPage("edit")}
+        onSavedProfiles={() => setPage("saved")}
+      />
+    );
+  }
 
-  const planLabel = {
-    monthly: "Monthly",
-    quarterly: "Quarterly",
-    annual: "Annual",
-    bronze: "Bronze",
-    silver: "Silver",
-    gold: "Gold",
-  };
+  if (page === "edit") {
+    return <EditProfile onBack={() => setPage("dashboard")} />;
+  }
 
+  if (page === "saved") {
+    return <SavedProfiles onBack={() => setPage("dashboard")} />;
+  }
+
+  if (page === "test") {
+    return <Test onBack={() => setPage("home")} />;
+  }
+
+  // 🏠 HOME
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, #f7f4f8 0%, #f3ecff 45%, #fff8ef 100%)",
-        padding: "60px 20px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "52px", color: "#22172b" }}>
-          Welcome to SeriousHeart
-        </h1>
+    <div style={{ textAlign: "center", marginTop: "100px" }}>
+      <h1>SeriousHeart</h1>
 
-        <button onClick={signOut}>Sign Out</button>
+      <button onClick={() => setPage("checkout")}>
+        Go to Checkout
+      </button>
 
-        <p style={{ fontSize: "18px", color: "#5f5364", lineHeight: "1.7" }}>
-          Discover psychologically compatible partners based on your unconscious
-          motivations and build a more intentional romantic journey.
-        </p>
+      <br /><br />
 
-        <div
-          style={{
-            padding: "12px 18px",
-            borderRadius: "999px",
-            display: "inline-block",
-            fontSize: "14px",
-            fontWeight: "bold",
-            backgroundColor: membershipActive ? "#e6f7ee" : "#f5f5f5",
-            color: membershipActive ? "#1f7a4d" : "#555",
-            border: membershipActive ? "1px solid #b7ebc6" : "1px solid #ddd",
-            marginBottom: "24px",
-          }}
-        >
-          Membership Status:{" "}
-          {membershipActive
-            ? `Active (${planLabel[membershipPlan] || "Plan"})`
-            : "Inactive"}
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          <button onClick={() => setPage("test")}>Take the Test</button>
-          <button onClick={() => setPage("dashboard")}>Open Dashboard</button>
-          <button onClick={() => setPage("saved")}>View Saved Profiles</button>
-          <button onClick={() => setPage("checkout")}>Open Checkout</button>
-        </div>
-
-        <div style={{ marginTop: "30px" }}>
-          <button onClick={() => setPage("success")}>Test Success Page</button>
-          <button onClick={() => setPage("cancel")}>Test Cancel Page</button>
-        </div>
-      </div>
+      <button onClick={() => setPage("dashboard")}>
+        Go to Dashboard
+      </button>
     </div>
   );
 }
