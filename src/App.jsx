@@ -45,10 +45,33 @@ function App() {
     );
   }
 
-  if (page === "cancel") {
+  if (page === "cancel") { 
     return <Cancel onBackHome={() => setPage("home")} />;
   }
-
+  if (page === "success") {
+  return (
+    <Success
+      onBackHome={() => setPage("home")}
+      onViewDashboard={() => setPage("dashboard")}
+    />
+  );
+}
+if (page === "success") {
+  return (
+    <Success
+      onBackHome={() => setPage("home")}
+      onViewDashboard={() => setPage("dashboard")}
+    />
+  );
+}
+if (page === "cancel") {
+  return (
+    <Cancel
+      onBackHome={() => setPage("home")}
+      onReturnCheckout={() => setPage("checkout")}
+    />
+  );
+}
   // 🔐 LOGIN PAGE
   if (!session) {
     return (
@@ -116,14 +139,16 @@ function App() {
   }
 
   if (page === "dashboard") {
-    return (
-      <Dashboard
-        onBackHome={() => setPage("home")}
-        onEditProfile={() => setPage("edit")}
-        onSavedProfiles={() => setPage("saved")}
-      />
-    );
-  }
+  return (
+    <Dashboard
+      user={session.user}
+      onBackHome={() => setPage("home")}
+      onStartTest={() => setPage("test")}
+      onViewSavedProfiles={() => setPage("saved")}
+      onEditProfile={() => setPage("edit")}
+    />
+  );
+}
 
   if (page === "edit") {
     return <EditProfile onBack={() => setPage("dashboard")} />;
