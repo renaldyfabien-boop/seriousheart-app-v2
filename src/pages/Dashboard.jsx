@@ -9,10 +9,10 @@ export default function Dashboard({ user, onBackHome }) {
     const loadProfile = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("*")
-        .eq("email", user.email) // ✅ IMPORTANT FIX
+        .eq("email", user.email)
         .maybeSingle();
 
       if (data) {
