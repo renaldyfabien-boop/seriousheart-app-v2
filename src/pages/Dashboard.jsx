@@ -2,26 +2,27 @@
 import { supabase } from "../lib/supabase";
 
 export default function Dashboard({ user, onBackHome }) {
-  const [profile, setProfile] = useState(null);
+  const [membershipActive, setMembershipActive] = useState(false);
+  const [membershipPlan, setMembershipPlan] = useState(null);
 
   useEffect(() => {
-    async function loadProfile() {
+    const loadProfile = async () => {
       if (!user) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("email", user.email) // ✅ IMPORTANT FIX
         .maybeSingle();
 
-      setProfile(data);
-    }
+      if (data) {
+        setMembershipActive(data.membership_active);
+        setMembershipPlan(data.membership_plan);
+      }
+    };
 
     loadProfile();
   }, [user]);
-
-  const membershipActive = profile?.membership_active;
-  const membershipPlan = profile?.membership_plan;
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
@@ -35,7 +36,7 @@ export default function Dashboard({ user, onBackHome }) {
       </h2>
 
       {membershipActive && (
-        <p>Plan: {membershipPlan ? membershipPlan.toUpperCase() : "Not set"}</p>
+        <p>Plan: {membershipPlan || "Bronze"}</p>
       )}
 
       <button onClick={onBackHome}>Back Home</button>
