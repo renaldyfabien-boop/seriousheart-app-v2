@@ -2,7 +2,7 @@
 import { supabase } from "../lib/supabase";
 
 export default function Dashboard({ user, onBackHome }) {
-  const [membershipActive, setMembershipActive] = useState(false);
+  const [membershipActive, setMembershipActive] = useState(null);
   const [membershipPlan, setMembershipPlan] = useState(null);
 
   useEffect(() => {
