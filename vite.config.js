@@ -1,3 +1,3 @@
-export default {
-  base: "/app/",
+ export default {
+  base: "/",
 };
